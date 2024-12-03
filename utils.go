@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func ReadInput(filename string) ([]int, []int) {
+func readFile(filename string) *os.File {
 	var path = "inputs/" + filename
 
 	file, err := os.Open(path)
@@ -17,8 +17,11 @@ func ReadInput(filename string) ([]int, []int) {
 		fmt.Printf("error opening file: %v\n", err)
 	}
 
+	return file
+}
+func ReadInput(filename string) ([]int, []int) {
+	file := readFile(filename)
 	defer file.Close()
-
 	scanner := bufio.NewScanner(file)
 
 	var left []int
@@ -41,4 +44,30 @@ func ReadInput(filename string) ([]int, []int) {
 	}
 
 	return left, right
+}
+
+func ReadLevels(filename string) [][]int {
+	file := readFile(filename)
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+
+	var readings []int
+	var multiLevelReadings [][]int
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		levels := strings.Fields(line)
+
+		for _, num := range levels {
+			num_int, _ := strconv.Atoi(num)
+			readings = append(readings, num_int)
+		}
+		multiLevelReadings = append(multiLevelReadings, readings)
+		readings = []int{}
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Printf("error reading file: %v\n", err)
+	}
+
+	return multiLevelReadings
 }
