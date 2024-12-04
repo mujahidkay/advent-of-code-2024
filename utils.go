@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -70,4 +71,49 @@ func ReadLevels(filename string) [][]int {
 	}
 
 	return multiLevelReadings
+}
+
+func multiply(groups []string) int{
+
+	pattern := `\d+`
+	result := 0
+	re := regexp.MustCompile(pattern)
+	shouldMult := true
+	var first, second int
+	for _, group := range groups {
+		if group == "do()" {
+			shouldMult = true
+		} else if group == "don't()" {
+			shouldMult = false
+		} else {
+			nums := re.FindAllString(group, -1)
+			first, _ = strconv.Atoi(nums[0])
+			second, _ = strconv.Atoi(nums[1])
+			if shouldMult {
+				result += (first * second)
+			}
+		}
+	}
+
+	return result
+}
+
+func ReadCorruptedData(filename string) int {
+	file := readFile(filename)
+
+	defer file.Close()
+
+	pattern := `(?m)do\(\)|don't\(\)|mul\(\d{1,3},\d{1,3}\)`
+	re := regexp.MustCompile(pattern)
+
+	scanner := bufio.NewScanner(file)
+	var matches []string
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		matches = append(matches, re.FindAllString(line, -1)...)
+	}
+
+	return multiply(matches)
+
 }
